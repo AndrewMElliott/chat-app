@@ -1,0 +1,13 @@
+.message-style{
+    list-style-type: none;
+}
+#message-container{
+    margin: 0 auto;
+    word-wrap: break-word;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width:30%;
+    height:500px;
+    text-align: left;
+    border: black 1px solid;
+}
