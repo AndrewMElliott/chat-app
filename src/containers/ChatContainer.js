@@ -13,8 +13,9 @@ class ChatContainer extends Component{
 			messages: [],
 			users: []
 		}
+		
 	}
-
+	
 	componentDidMount(){
 		var config = {
 			apiKey: "AIzaSyABTZhpAfL1RnBf_4lE2Vix38gaksYYmos",
@@ -28,7 +29,6 @@ class ChatContainer extends Component{
 		this.setupUser();
 		this.retrieveMessages();
 		this.retrieveUsers();
-		
 	}
 	
 	setupUser = () => {
@@ -65,10 +65,10 @@ class ChatContainer extends Component{
 			let ref = firebase.database().ref('messages/')
 			ref.push(nextMessage)
 				.then(res => {
-					console.log(res.key);
+					this.setState({text: ""})
+					event.target.value = ""
 				});
-			this.setState({text: ""})
-			event.target.value = ""
+		
 		}
 
 	}
@@ -82,11 +82,9 @@ class ChatContainer extends Component{
 			let ref = firebase.database().ref('messages/')
 			ref.push(nextMessage)
 				.then(res => {
-					console.log(res.key);
+					this.setState({text: ""})
+					this.refs.chatTextfield.value = ""
 				});
-			
-			this.setState({text: ""})
-			this.refs.chatTextfield.value = ""
 		}
 	}
 
@@ -97,11 +95,10 @@ class ChatContainer extends Component{
 				let msg = index.val();
 				incMessages.push({id:index.key, message: msg.message, handle: msg.handle});
 			});
-			this.setState({messages: incMessages});
-			this.scrollBottom.scrollIntoView({behavior:"smooth"});
+			this.setState({messages: incMessages}, () => {
+				this.bottom.scrollIntoView({behavior:"smooth"});
+			});
 		})
-		//console.log(this.scrollBottom)
-		
 	}
 	updateText = (event) => {
 		console.log("update: " + event.target.value);
@@ -131,39 +128,49 @@ class ChatContainer extends Component{
 	)
 
 	changeHandle = (event) => {
-		if(event.charCode === 13 && event.target.value.trim() !== ""){
+		if((event.charCode === 13 || event.type === 'click') && this.refs.handle.value !== ""){
 			const updateHandle = {
-				user: event.target.value
+				user: this.refs.handle.value
 			}
 			let update = firebase.database().ref('users/' + this.state.userId)
 			update.update(updateHandle)
-			this.setState({handle: event.target.value})
+			this.setState({handle: this.refs.handle.value})
 		}
 	}
 
 	render(){
 		return(
-			<div>
+			<div id="chat-root">
 				<input type="text" onKeyPress={this.changeHandle} ref="handle"/>
-				<button >Change Handle</button>
-				<div id="message-container">
+				<button onClick={this.changeHandle}>Change Handle</button>
+				<div>
+				<div ref={ (el) => {this.scrollBottom = el}} id="message-container">
 					<ul className="message-style">
 						{this.renderChat()}
 					</ul>	
-					<span ref={ el => this.scrollBottom = el}></span>
+					<div ref={el => this.bottom = el}></div>
 				</div>
-				<input  ref="chatTextfield"
-								type="text" 
-								placeholder="Type here..." 
-								onChange={(event) => this.updateText(event)} 
-								onKeyPress={(event) => this.onEnterSubmit(event)}
-				></input>
-				<button onClick={(event) => this.onSubmit(event)}>submit</button>
-				<div>
+				<div id="user-container">
 					<ul className="message-style">
 						{this.renderUsers()}
 					</ul>
-				</div>				
+				</div>
+				<div>
+					<textarea  ref="chatTextfield"
+								type="text" 
+								placeholder="Type here..." 
+								className="message-box"
+								autoFocus
+								onChange={(event) => this.updateText(event)} 
+								onKeyPress={(event) => this.onEnterSubmit(event)}
+					></textarea>	
+					<span>
+					<button className="button" onClick={(event) => this.onSubmit(event)}>Send</button>
+					</span>
+				</div>
+				</div>
+				
+							
 			</div>
 
 		);
