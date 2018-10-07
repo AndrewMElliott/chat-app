@@ -40,7 +40,7 @@ class ChatContainer extends Component{
 				});
 				let disconnect = firebase.database().ref('users/' + res.key);
 				disconnect.onDisconnect().remove();
-		})
+		});
 	}
 
 	retrieveUsers = () => {
@@ -66,7 +66,7 @@ class ChatContainer extends Component{
 			ref.push(nextMessage)
 				.then(res => {
 					this.setState({text: ""})
-					this.refs.chatTextfield.value = ""
+					this.chatTextfield.value = ""
 				});
 		}
 	}
@@ -85,13 +85,13 @@ class ChatContainer extends Component{
 	}
 
 	changeHandle = (event) => {
-		if((event.charCode === 13 || event.type === 'click') && this.refs.handle.value !== ""){
+		if((event.charCode === 13 || event.type === 'click') && this.handle.value !== ""){
 			const updateHandle = {
-				user: this.refs.handle.value
+				user: this.handle.value
 			};
 			let update = firebase.database().ref('users/' + this.state.userId);
 			update.update(updateHandle);
-			this.setState({handle: this.refs.handle.value});
+			this.setState({handle: this.handle.value});
 		}
 	}
 
@@ -106,7 +106,7 @@ class ChatContainer extends Component{
 		this.state.messages.map((message, i) => {
 			return (
 				<li className=""
-						key={message.id}
+					key={message.id}
 				> {message.handle + ": " + message.message} 
 				</li>
 			)
@@ -117,19 +117,17 @@ class ChatContainer extends Component{
 		this.state.users.map((user, i) => {
 			return (
 				<li className=""
-						key={user.id}
+					key={user.id}
 				> {user.handle } 
 				</li>
 			)
 		})
 	)
 
-	
-
 	render(){
 		return(
 			<div id="chat-root">
-				<input type="text" onKeyPress={this.changeHandle} ref="handle"/>
+				<input type="text" onKeyPress={this.changeHandle} ref={el => this.handle = el}/>
 				<button onClick={this.changeHandle}>Change Handle</button>
 				<div>
 				<div ref={ (el) => {this.scrollBottom = el}} id="message-container">
@@ -144,7 +142,7 @@ class ChatContainer extends Component{
 					</ul>
 				</div>
 				<div>
-					<textarea  ref="chatTextfield"
+					<textarea  ref={el => this.chatTextfield = el}
 								type="text" 
 								placeholder="Type here..." 
 								className="message-box"
