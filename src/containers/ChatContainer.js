@@ -13,7 +13,6 @@ class ChatContainer extends Component{
 			messages: [],
 			users: []
 		}
-		
 	}
 	
 	componentDidMount(){
@@ -32,17 +31,18 @@ class ChatContainer extends Component{
 	}
 	
 	setupUser = () => {
-		let userKey = firebase.database().ref('users/')
-		const user = {user: this.state.handle}
+		let userKey = firebase.database().ref('users/');
+		const user = {user: this.state.handle};
 		userKey.push(user)
 			.then(res => {
 				this.setState({
 					userId: res.key
-				})
-				let disconnect = firebase.database().ref('users/' + res.key)
+				});
+				let disconnect = firebase.database().ref('users/' + res.key);
 				disconnect.onDisconnect().remove();
 		})
 	}
+
 	retrieveUsers = () => {
 		firebase.database().ref('users/').on('value', (snapshot) => {
 			let incUsers = [];
@@ -53,32 +53,15 @@ class ChatContainer extends Component{
 				});
 				this.setState({users: incUsers});
 			}
-		})
+		});
 	}
 
-	onEnterSubmit = (event) => {
-		if(event.charCode === 13 && this.state.text.trim() !== ""){
-			const nextMessage = {
-				handle: this.state.handle,
-				message: this.state.text
-			}
-			let ref = firebase.database().ref('messages/')
-			ref.push(nextMessage)
-				.then(res => {
-					this.setState({text: ""})
-					event.target.value = ""
-				});
-		
-		}
-
-	}
 	onSubmit = (event) => {
-		console.log("submit: " + this.state.text);
-		if(this.state.text.trim() !== ""){
+		if((event.charCode === 13 || event.type === 'click') && this.state.text.trim() !== ""){
 			const nextMessage = {
 				handle: this.state.handle,
 				message: this.state.text
-			}
+			};
 			let ref = firebase.database().ref('messages/')
 			ref.push(nextMessage)
 				.then(res => {
@@ -98,14 +81,27 @@ class ChatContainer extends Component{
 			this.setState({messages: incMessages}, () => {
 				this.bottom.scrollIntoView({behavior:"smooth"});
 			});
-		})
+		});
 	}
+
+	changeHandle = (event) => {
+		if((event.charCode === 13 || event.type === 'click') && this.refs.handle.value !== ""){
+			const updateHandle = {
+				user: this.refs.handle.value
+			};
+			let update = firebase.database().ref('users/' + this.state.userId);
+			update.update(updateHandle);
+			this.setState({handle: this.refs.handle.value});
+		}
+	}
+
 	updateText = (event) => {
-		console.log("update: " + event.target.value);
+	//	console.log("update: " + event.target.value);
 		this.setState({
 			text: event.target.value
-		})
+		});
 	}
+
 	renderChat = () => (
 		this.state.messages.map((message, i) => {
 			return (
@@ -116,6 +112,7 @@ class ChatContainer extends Component{
 			)
 		})
 	)
+
 	renderUsers = () => (
 		this.state.users.map((user, i) => {
 			return (
@@ -127,16 +124,7 @@ class ChatContainer extends Component{
 		})
 	)
 
-	changeHandle = (event) => {
-		if((event.charCode === 13 || event.type === 'click') && this.refs.handle.value !== ""){
-			const updateHandle = {
-				user: this.refs.handle.value
-			}
-			let update = firebase.database().ref('users/' + this.state.userId)
-			update.update(updateHandle)
-			this.setState({handle: this.refs.handle.value})
-		}
-	}
+	
 
 	render(){
 		return(
@@ -162,7 +150,7 @@ class ChatContainer extends Component{
 								className="message-box"
 								autoFocus
 								onChange={(event) => this.updateText(event)} 
-								onKeyPress={(event) => this.onEnterSubmit(event)}
+								onKeyPress={(event) => this.onSubmit(event)}
 					></textarea>	
 					<span>
 					<button className="button" onClick={(event) => this.onSubmit(event)}>Send</button>
