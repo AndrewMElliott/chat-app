@@ -13,7 +13,7 @@ class ChatContainer extends Component{
 			messages: [],
 			users: []
 		} 
-		
+		let what = 0;
 	}
 	
 	componentDidMount(){
